@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('header-head.html'); %>
+    <title>Welcome <%= user.name %> </title>
+    <style>
+      .choices{
+        padding-left: 10px;
+        border-left: 4px solid #2196f3;
+        padding-right: 10px;
+        border-right: 4px solid #2196f3;
+      }
+      .btn-choice{
+        background-color: #2196f3;
+        border-color: #2196f3;
+      }
+      .questions{
+        padding-left: 10px;
+        border-left: 4px solid #e91e63;
+        padding-right: 10px;
+        border-right: 4px solid #e91e63;
+        padding-bottom:10px;
+      }
+      .btn-question{
+        background-color: #e91e63;
+        border-color: #e91e63;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <%- include('header.html'); %>
+    </nav>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <%- include('sidebar.html'); %>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <h1 class="page-header">Create Survey</h1>
+          <div class="row" id="app">
+             <div class="col-md-8 col-md-offset-2">
+               <div class="alert alert-success" v-if="results.success.length>0">
+                 <strong>Hurray!</strong> {{results.success}}
+               </div>
+               <div class="alert alert-danger" v-if="results.error.length>0">
+                 <strong>Whoops!</strong> {{results.error}}
+               </div>
+              <form action="#">
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">Name</label>
+                    <input type="text" class="form-control" v-model="survey.name" placeholder="Survey Name" required>
+                  </div>
+                  <div class="questions" v-for="(q,i) in survey.questionnaires">
+                    <div class="form-group">
+                      <div class="form-group">
+                        <label for="exampleInputEmail1">Question {{(i+1)}}</label>
+                        <div class="input-group">
+                          <input type="text" class="form-control" v-model="survey.questionnaires[i].question" placeholder="Question" required>
+                          <span class="input-group-addon">
+                              <input type="checkbox" v-model="survey.questionnaires[i].multi"> {{ survey.questionnaires[i].multi?'Multiple':'Single' }} Choice
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="choices" >
+                      <div class="form-group" v-for="(c,index) in q.choices">
+                        <label for="exampleInputEmail1">Choice {{(index+1)}}</label>
+                        <input v-if="index<2" type="text" class="form-control" v-model="survey.questionnaires[i].choices[index].text" placeholder="Choice {{(index+1)}}" required>
+                        <div v-else class="input-group">
+                          <input type="text" class="form-control" v-model="survey.questionnaires[i].choices[index].text" placeholder="Choice {{(index+1)}}" required>
+                          <span class="input-group-btn">
+                            <button type="button" @click="removechoice(i,index)" class="btn btn-danger"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <button type="button" @click="addchoice(i)" class="add-choice btn btn-primary btn-choice btn-block"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+                  </div>
+                  <button type="button"n @click="addquestion" class="btn btn-danger btn-question btn-block"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+                </form>
+                <button style="margin-top: 10px;" @click="create" type="button" class="btn btn-success">Create</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="/static/js/vue.min.js"></script>
+    <script src="/static/js/axios.min.js"></script>
+    <script>
+      new Vue({
+        el: '#app',
+        data:{
+          survey:{
+            name:"My Quick Survey",
+            questionnaires:[{
+              question:"Ready for a quick survey?",
+              multi:true,
+              choices:[
+                {text:"Yes"},
+                {text:"No"}
+              ]
+            }]  
+          },
+          results:{
+            success:"",
+            error:""
+          }
+        },
+        methods:{
+          create:function(){
+            console.log(this.survey.questionnaires); //return;
+            axios({
+                method: 'post',
+                url: '/api/survey/surveys',
+                data: this.survey
+            }).then((response)=>{
+                if(response.status==201)
+                    this.results.success="Survey created successfully";
+                else
+                    this.results.error="Looks like server is not working";
+                console.log(response);
+            }).catch((error)=>{
+                if(error.response | (error.response.status==422)){
+                    this.results.error=error.response.data.message;
+                }else
+                    this.results.error="Looks like server is not working";
+                console.log(error.response);
+            });
+          },
+          addchoice:function(i){
+            this.survey.questionnaires[i].choices.push({text:"New Choice"})
+          },
+          removechoice:function(i,j){
+            this.survey.questionnaires[i].choices.splice(j,1)
+          },
+          addquestion:function(){
+            this.survey.questionnaires.push({
+              question:"Next question?",
+              multi:true,
+              choices:[
+                {text:"Choice1"},
+                {text:"Choice2"}
+              ]
+            })
+          }
+        }
+      })
+    </script>
+  </body>
+</html>

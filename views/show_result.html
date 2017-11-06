@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('header-head.html'); %>
+    <title>Welcome <%= user.name %> </title>
+    <style>
+      .chart{
+        background-color: #90caf9;
+        border-left: 5px solid #2d5271;
+        border-top: 5px solid #2d5271;
+      }
+      .chart div {
+        font: 15px sans-serif;
+        background-color: steelblue;
+        text-align: right;
+        margin-bottom: 5px;
+        color: white;
+        height: 30px;
+        line-height: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <%- include('header.html'); %>
+    </nav>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <%- include('sidebar.html'); %>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <h1 class="page-header">Results of <%= question %></h1>
+          <% if(max>0){ %>
+          <div class="chart">
+            <% for(var key in choices){ %>
+            <div style="width: <%= (choices[key].count*100)/max %>%;"><%= choices[key].text %></div>
+            <% } %>
+          </div>
+          <% }else{ %>
+          <h4>Nothing yet</h4>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

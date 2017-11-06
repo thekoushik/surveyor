@@ -1,0 +1,130 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="<%= servey.name %>">
+        <title>Embed Survey</title>
+        <link rel="icon" href="/static/img/favicon.ico">
+        <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/grids-responsive-min.css">
+        <style>
+            #layout{
+                padding:0px;
+            }
+            .content {
+                padding: 2em 1em 0;
+            }
+            .content-subhead {
+                text-transform: uppercase;
+                color: #aaa;
+                border-bottom: 1px solid #eee;
+                padding: 0.4em 0;
+                font-size: 100%;
+                font-weight: 500;
+                letter-spacing: 0.1em;
+                margin-bottom: 0px;
+                margin-top: 0px;
+            }
+            .post {
+                padding-bottom: 2em;
+            }
+            .post-title {
+                font-size: 1.5em;
+                color: #222;
+                margin-bottom: 0.2em;
+                margin-top: 12px;
+            }
+            .post-description {
+                font-family: Georgia, "Cambria", serif;
+                color: #444;
+                line-height: 1.8em;
+            }
+            .post-meta {
+                color: #999;
+                font-size: 90%;
+                margin: 0;
+            }
+            span.choice{
+                margin-right: 10px;
+                padding-left: 10px;
+            }
+            .hidden{
+                display: none;
+            }
+            h1#survey-done{
+                width: 100%;
+                letter-spacing: 0;
+                text-align: center;
+            }
+            input[type=checkbox]{
+                -ms-transform: scale(1.5); /* IE */
+                -moz-transform: scale(1.5); /* FF */
+                -webkit-transform: scale(1.5); /* Safari and Chrome */
+                -o-transform: scale(1.5); /* Opera */
+            }
+        </style>
+    </head>
+    <body>
+        <div id="layout" class="pure-g">
+            <div class="content pure-u-1" id="survey">
+                <h1 class="content-subhead"><%= servey.name %></h1>
+                <% servey.questionnaires.forEach((question,index)=>{ %>
+                <section id="question<%= index %>" class="post <%= index==0?'':'hidden' %>" data-question="<%= question._id %>" >
+                    <header class="post-header">
+                        <h2 class="post-title"><%= question.question %></h2>
+                    </header>
+                    <div class="post-description">
+                        <p class="pure-g">
+                        <% question.choices.forEach((choice)=>{ %>
+                            <span class="choice pure-u-1-1"><input data-id="<%= choice._id %>" class="choice-set-<%= index %>" type="checkbox"> <span style="margin-left:5px;"><%= choice.text %></span></span>
+                        <% }) %>
+                        </p>
+                        <% if(index!=servey.questionnaires.length-1){ %>
+                        <button data-index="<%= index %>" data-last="<%= servey.questionnaires.length-1 %>" class="next-btn pure-button pure-button-primary">Next</button>
+                        <%}else{%>
+                        <button data-index="<%= index %>" class="finish-btn pure-button pure-button-primary">Finish</button>
+                        <%}%>
+                    </div>
+                </section>
+                <% }) %>
+            </div>
+            <h1 id="survey-done" class="hidden">Thank You For Your Valuable Time</h1>
+        </div>
+        <script>
+            var sendResult=function(question_id,choices){
+                if(choices.length==0) return;
+                var xhr = new XMLHttpRequest();
+                var url = "/api/survey/<%= servey._id %>/"+question_id+"/result";
+                xhr.open("POST", url, true);
+                xhr.setRequestHeader("Content-type", "application/json");
+                xhr.onreadystatechange = function(){
+                    if (xhr.readyState === 4 && xhr.status === 201) {
+                        /*var json = JSON.parse(xhr.responseText);
+                        console.log(json.email + ", " + json.password);*/
+                    }
+                };
+                var data = {choices:choices};
+                xhr.send(JSON.stringify(data));
+            }    
+            Array.prototype.forEach.call(document.getElementsByClassName("next-btn"),function(el){
+                el.addEventListener('click',function(){
+                    var index=Number(this.getAttribute('data-index'));
+                    var last=Number(this.getAttribute('data-last'));
+                    var next=0;
+                    if(index!=last) next=index+1
+                    var choices=Array.prototype.map.call(document.getElementsByClassName("choice-set-"+index),function(i){return i.checked?i.getAttribute('data-id'):null});
+                    sendResult(this.parentElement.parentElement.getAttribute('data-question'),choices.filter(Boolean));
+                    document.getElementById("question"+index).className="post hidden";
+                    document.getElementById("question"+next).className="post";
+                })
+            });
+            document.getElementsByClassName("finish-btn")[0].addEventListener('click',function(){
+                var index=Number(this.getAttribute('data-index'));
+                var choices=Array.prototype.map.call(document.getElementsByClassName("choice-set-"+index),function(i){return i.checked?i.getAttribute('data-id'):null});
+                sendResult(this.parentElement.parentElement.getAttribute('data-question'),choices.filter(Boolean));
+                document.getElementById("survey").className="hidden";
+                document.getElementById("survey-done").className="";
+            })
+        </script>
+    </body>
+</html>

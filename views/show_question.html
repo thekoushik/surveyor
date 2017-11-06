@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('header-head.html'); %>
+    <title>Welcome <%= user.name %> </title>
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <%- include('header.html'); %>
+    </nav>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <%- include('sidebar.html'); %>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <h1 class="page-header"><%= question.question %> of <%= servey_name %></h1>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <tbody>
+                <% question.choices.forEach(function(item,index){ %>
+                <tr>
+                  <td><%= item._id %></td>
+                  <td><%= item.text %></td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

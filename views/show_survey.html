@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('header-head.html'); %>
+    <title>Welcome <%= user.name %> </title>
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <%- include('header.html'); %>
+    </nav>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <%- include('sidebar.html'); %>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <h1 class="page-header"><%= servey.name %></h1>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Question</th>
+                  <th>Choice Count</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% servey.questionnaires.forEach(function(item,index){ %>
+                <tr>
+                  <td><%= (index+1) %></td>
+                  <td><a href="/account/show_servey/<%= servey._id %>/<%= item._id %>"><%= item.question %></a></td>
+                  <td><%= item.choices.length %></td>
+                  <td><a href="/account/show_servey/<%= servey._id %>/<%= item._id %>/results" class="btn btn-primary">Show Results</a></td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

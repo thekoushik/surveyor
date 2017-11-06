@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>RememberIt</title>
+    <link rel="shortcut icon" href="/static/img/favicon.ico">
+    <!-- Bootstrap Core CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Theme CSS -->
+    <link href="/static/css/join.css" rel="stylesheet">
+    <!-- Custom Fonts -->
+    <link href="/static/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <!--<link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">-->
+</head>
+
+<body>
+    <div class="container">
+        <div id="fullscreen_bg" class="fullscreen_bg" />
+        
+            <div class="form-signin">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-4 col-md-offset-4">
+                            <div class="panel panel-default">
+                                <div class="panel-body" id="app">
+                                    <h3 class="text-center">SIGN UP</h3>
+                                    <form class="form form-signup" role="form" @submit.prevent="validateBeforeSubmit">
+                                    <div class="form-group" :class="{'has-error': errors.has('name') }">
+                                        <label class="control-label" for="name">Name</label>
+                                        <input name="name" v-model="name" v-validate="'required|min:3'" class="form-control" type="text" placeholder="Full Name">
+                                        <p class="text-danger" v-if="errors.has('name')">{{ errors.first('name') }}</p>
+                                    </div>
+                                    <div class="form-group" :class="{'has-error': errors.has('email') }" >
+                                        <label class="control-label" for="email">Email</label>
+                                        <input name="email" v-model="email" v-validate="'required|email'" class="form-control" type="email" placeholder="Email">
+                                        <p class="text-danger" v-if="errors.has('email')">{{ errors.first('email') }}</p>
+                                    </div>
+                                    <div class="form-group" :class="{'has-error': errors.has('username') }" >
+                                        <label class="control-label" for="username">Username</label>
+                                        <input name="username" v-model="username" v-validate="'required|min:5'" class="form-control" type="text" placeholder="Username">
+                                        <p class="text-danger" v-if="errors.has('username')">{{ errors.first('username') }}</p>
+                                    </div>
+                                    <div class="form-group" :class="{'has-error': errors.has('secret') }">
+                                        <label class="control-label" for="secret">Secret</label>
+                                        <input name="secret" v-model="secret" v-validate="'required|min:4'" class="form-control" type="text" placeholder="Code Phrase">
+                                        <p class="text-danger" v-if="errors.has('secret')">{{ errors.first('secret') }}</p>
+                                    </div>
+                                    <button type="submit" class="btn btn-sm btn-primary btn-block" role="button">
+                                        SUBMIT
+                                    </button>
+                                    <a href="login" class="btn btn-link">Login</a>
+                                    <a href="/" class="btn btn-link">Back</a>
+
+                                    <div class="alert alert-danger" v-if="getResultError.length">
+                                        {{ getResultError }}
+                                    </div>
+                                    <div class="alert alert-success" v-if="getResultSuccess.length">
+                                        {{ getResultSuccess }}
+                                    </div>
+                                </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+    <script src="/static/js/vue.min.js"></script>
+    <script src="/static/js/vee-validate.js"></script>
+    <script src="/static/js/axios.min.js"></script>
+    <script>
+        Vue.use(VeeValidate);
+        var app2 = new Vue({
+            el: '#app',
+            data: {
+                name: '',
+                email: '',
+                username: '',
+                secret:'',
+                resultSuccess: '',
+                resultError: ''
+            },
+            computed:{
+                getResultError:function(){
+                    return this.resultError
+                },
+                getResultSuccess:function(){
+                    return this.resultSuccess
+                }
+            },
+            methods: {
+                validateBeforeSubmit:function(e) {
+                    this.$validator.validateAll();
+                    if (!this.errors.any()) {
+                        this.submitForm()
+                    }
+                },
+                submitForm:function(){
+                    axios({
+                        method: 'post',
+                        url: '/api/user/users',
+                        data: {
+                            name: this.name,
+                            email: this.email,
+                            username: this.username,
+                            password: this.secret
+                        }
+                    }).then((response)=>{
+                        if(response.status==201)
+                            this.resultSuccess="Registration Successful";
+                        else
+                            this.resultError="Whoops, looks like server is not working";
+                        console.log(response);
+                    }).catch((error)=>{
+                        if(error.response | (error.response.status==422)){
+                            this.resultError=error.response.data.message;
+                        }else
+                            this.resultError="Whoops, looks like server is not working";
+                        console.log(error.response);
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
