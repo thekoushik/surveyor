@@ -2,6 +2,7 @@ var app = require('../index');
 var Survey = require('../models').survey;
 var util = require('util');
 var Result = require('../models').result;
+var XLSX = require('xlsx');
 
 module.exports.index=function(req,res){
     if(req.isAuthenticated())
@@ -74,6 +75,28 @@ module.exports.show_question_results=(req,res)=>{
                 if(stat.max<item.value) stat.max=item.value;
             });
             res.render('show_result',{user:req.user,question:data.question.question,choices:choices,max:stat.max});
+        }).catch((err)=>{
+            res.render('500',{err:err});
+        })
+};
+module.exports.export=(req,res)=>{
+    Survey
+        .find({user: req.user._id})
+        .exec().then((surveys)=>{
+            var wb=XLSX.utils.book_new();
+            surveys.forEach((s)=>{
+                var data = s.questionnaires.map((q)=>{
+                    var d={question:q.question};
+                    q.choices.forEach((c,i)=>{
+                        d['choice'+(i+1)]=c.text
+                    })
+                    return d
+                });
+                var ws=XLSX.utils.json_to_sheet(data);
+                XLSX.utils.book_append_sheet(wb,ws,s.name);
+            })
+            res.writeHead(200, [['Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']]);
+            res.end(XLSX.write(wb, {type: 'buffer'}));
         }).catch((err)=>{
             res.render('500',{err:err});
         })

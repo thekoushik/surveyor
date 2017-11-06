@@ -86,6 +86,9 @@ const routerJson=[
                     },{
                         path:"/show_servey/:id/:question_id/results",
                         controller: controllers.main.show_question_results
+                    },{
+                        path: "/export",
+                        controller: controllers.main.export
                     }
                 ]
             },{
