@@ -32,6 +32,7 @@
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <h1 class="page-header">Results of <%= question %></h1>
           <% if(max>0){ %>
+            <h5>0 %<span class="pull-right">100 %</span></h5>
           <div class="chart">
             <% for(var key in choices){ %>
             <div style="width: <%= (choices[key].count*100)/max %>%;"><%= choices[key].text %></div>

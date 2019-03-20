@@ -64,13 +64,13 @@ module.exports.show_question_results=(req,res)=>{
                         reduce:function(key,values){return values.length},
                         query:{survey:req.params.id,question:req.params.question_id}
                     });
-        }).then((results)=>{
+        }).then((result)=>{
             var choices={};
             data.question.choices.forEach((item)=>{
                 choices[item._id]={count:0,text:item.text};
             });
             var stat={max:0};
-            results.forEach((item)=>{
+            result.results.forEach((item)=>{
                 choices[item._id].count=item.value;
                 if(stat.max<item.value) stat.max=item.value;
             });
